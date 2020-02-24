@@ -72,7 +72,7 @@ class CPU:
     def run(self):
         """Run the CPU."""
         running = True
-        # Set register flag
+        # Set flag register
         self.reg[self.fl] = 0
         # Instructions Decoded from LS8-spec
         HLT = 0b00000001
