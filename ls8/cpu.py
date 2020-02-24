@@ -10,7 +10,7 @@ class CPU:
         self.ram = [0] * 255
         self.pc = 0
         self.reg = [0] * 8
-        
+        self.fl = 0
 
     def load(self):
         """Load a program into memory."""
@@ -71,4 +71,38 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        # Set register flag
+        self.reg[self.fl] = 0
+        # Instructions Decoded from LS8-spec
+        HLT = 0b00000001
+        LDI = 0b10000010
+        PRN = 0b01000111
+        
+        while running or self.pc < len(self.ram):
+            # IR comes from readme. needs to read mem address stored in PC and store result in IR
+            IR = self.ram_read(self.pc)
+            #  op_a needs to read next byte after PC
+            operand_a = self.ram_read(self.pc + 1)
+            #  op_b needs to read next 2 bytes after PC
+            operand_b = self.ram_read(self.pc + 2)
+            # print('Running ---', IR)                
+            if IR == HLT:
+                print("HALT")
+                running = False
+                sys.exit(0)
+
+            if IR == LDI:
+                # LDI: register immediate. Set the value of a register to an integer
+                # Now put value in correct register
+                print("LDI runs first")
+                self.reg[operand_a] = operand_b
+                # used both, so advance by 3 to start at next correct value
+                # op_a will be 1 ahead from current pos, op_b 2
+                self.pc += 3
+
+            if IR == PRN:
+                # PRN: register pseudo-instruction
+                # print numeric value stored in given register
+                print(self.reg[operand_a])
+                self.pc += 2
