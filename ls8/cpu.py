@@ -97,12 +97,25 @@ class CPU:
                 # Now put value in correct register
                 print("LDI runs first")
                 self.reg[operand_a] = operand_b
+                print("reg", self.reg)
                 # used both, so advance by 3 to start at next correct value
                 # op_a will be 1 ahead from current pos, op_b 2
+                print("PC", self.pc)
                 self.pc += 3
 
             if IR == PRN:
                 # PRN: register pseudo-instruction
                 # print numeric value stored in given register
                 print(self.reg[operand_a])
+                print("reg", self.reg)
+                print("PC", self.pc)
                 self.pc += 2
+
+            else: 
+                print("------------------")
+                print("IR, 130 = LDI =>", IR)
+                print("PC", self.pc)
+                print("reg", self.reg)
+                print("op_a", operand_a)
+                print("op_b", operand_b)
+                print("------------------")
