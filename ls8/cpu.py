@@ -7,31 +7,35 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = [0] * 255
+        self.ram = [0] * 256
         self.pc = 0
         self.reg = [0] * 8
         self.fl = 0
 
     def load(self):
         """Load a program into memory."""
-
+        #Get File name
+        print(sys.argv)
+        # grab the second file path
+        filename = sys.argv[1]
         address = 0
 
-        # For now, we've just hardcoded a program:
+        with open(filename) as f:
+            for line in f:
+                l = line.split("#")
+                l[0] = l[0].strip()
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+                if l[0] == '':
+                    continue
+                # convert string l[0] to int
+                # convert int binary to binary code
+                # value = int(bin(binary), 2)
+                # binary = int(l[0])
+                # print(int(bin(binary), 2))
+                value = int(l[0], 2)
+                self.ram[address] = value
+                print("In ram, printed:", bin(self.ram[address]))
+                address += 1
 
     def ram_read(self, MAR):
         return self.ram[MAR]
@@ -78,6 +82,7 @@ class CPU:
         HLT = 0b00000001
         LDI = 0b10000010
         PRN = 0b01000111
+        MUL = 0b10100010
         
         while running or self.pc < len(self.ram):
             # IR comes from readme. needs to read mem address stored in PC and store result in IR
@@ -95,27 +100,29 @@ class CPU:
             if IR == LDI:
                 # LDI: register immediate. Set the value of a register to an integer
                 # Now put value in correct register
-                print("LDI runs first")
+                # print("LDI runs first")
                 self.reg[operand_a] = operand_b
-                print("reg", self.reg)
+                # print("reg", self.reg)
                 # used both, so advance by 3 to start at next correct value
                 # op_a will be 1 ahead from current pos, op_b 2
-                print("PC", self.pc)
+                # print("PC", self.pc)
                 self.pc += 3
 
             if IR == PRN:
                 # PRN: register pseudo-instruction
                 # print numeric value stored in given register
                 print(self.reg[operand_a])
-                print("reg", self.reg)
-                print("PC", self.pc)
+                # print("reg", self.reg)
+                # print("PC", self.pc)
                 self.pc += 2
 
-            else: 
-                print("------------------")
-                print("IR, 130 = LDI =>", IR)
-                print("PC", self.pc)
-                print("reg", self.reg)
-                print("op_a", operand_a)
-                print("op_b", operand_b)
-                print("------------------")
+            # if IR == MUL:
+                
+            # else: 
+            #     print("------------------")
+            #     print("IR, 130 = LDI =>", IR)
+            #     print("PC", self.pc)
+            #     print("reg", self.reg)
+            #     print("op_a", operand_a)
+            #     print("op_b", operand_b)
+            #     print("------------------")
