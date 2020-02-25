@@ -49,7 +49,10 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "SUB": 
+            self.reg[reg_a] -= self.reg[reg_b]
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -116,7 +119,11 @@ class CPU:
                 # print("PC", self.pc)
                 self.pc += 2
 
-            # if IR == MUL:
+            if IR == MUL:
+                #  instruction handled by the ALU.
+                # Multiply the values in two registers together and store the result in registerA.
+                self.alu("MUL", operand_a, operand_b)
+                self.pc += 3
                 
             # else: 
             #     print("------------------")
