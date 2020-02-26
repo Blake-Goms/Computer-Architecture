@@ -105,18 +105,17 @@ class CPU:
                 running = False
                 sys.exit(0)
 
-            if IR == LDI:
+            elif IR == LDI:
+                print("LDI =>", bin(IR))
                 # LDI: register immediate. Set the value of a register to an integer
                 # Now put value in correct register
-                # print("LDI runs first")
                 self.reg[operand_a] = operand_b
-                # print("reg", self.reg)
                 # used both, so advance by 3 to start at next correct value
                 # op_a will be 1 ahead from current pos, op_b 2
-                # print("PC", self.pc)
                 self.pc += 3
 
-            if IR == PRN:
+            elif IR == PRN:
+                print("PRN =>", bin(IR))
                 # PRN: register pseudo-instruction
                 # print numeric value stored in given register
                 print(self.reg[operand_a])
@@ -124,14 +123,16 @@ class CPU:
                 # print("PC", self.pc)
                 self.pc += 2
 
-            if IR == MUL:
-                #  instruction handled by the ALU.
+            elif IR == MUL:
+                print("MUL =>", bin(IR))
+                # instruction handled by the ALU.
                 # Multiply the values in two registers together and store the result in registerA.
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
                 
                 
-            if IR == POP:
+            elif IR == POP:
+                print("POP =>", bin(IR))
                 # Get the value at top of the stack thats in the SP register
                 value = self.ram[self.reg[self.sp]]
                 # Put that value in current selected register
@@ -139,7 +140,8 @@ class CPU:
                 # don't forget to increment register/sp
                 self.reg[self.sp] += 1
                 self.pc += 2
-            if IR == PUSH:
+            elif IR == PUSH:
+                print("PUSH =>", bin(IR))
                 # FIRST DECREMENT stack pointer
                 self.reg[self.sp] -= 1
                 # look in and get the register op_a
@@ -150,7 +152,6 @@ class CPU:
                 
             # else: 
             #     print("------------------")
-            #     print("IR, 130 = LDI =>", IR)
             #     print("PC", self.pc)
             #     print("reg", self.reg)
             #     print("op_a", operand_a)
