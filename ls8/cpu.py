@@ -11,6 +11,7 @@ class CPU:
         self.pc = 0
         self.reg = [0] * 8
         self.fl = 0
+        self.sp = 3
 
     def load(self):
         """Load a program into memory."""
@@ -81,11 +82,15 @@ class CPU:
         running = True
         # Set flag register
         self.reg[self.fl] = 0
+        # Set Stack Pointer
+        self.reg[self.sp] = 244
         # Instructions Decoded from LS8-spec
         HLT = 0b00000001
         LDI = 0b10000010
         PRN = 0b01000111
         MUL = 0b10100010
+        POP = 0b01000110
+        PUSH = 0b01000101
         
         while running or self.pc < len(self.ram):
             # IR comes from readme. needs to read mem address stored in PC and store result in IR
@@ -124,6 +129,24 @@ class CPU:
                 # Multiply the values in two registers together and store the result in registerA.
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+                
+                
+            if IR == POP:
+                # Get the value at top of the stack thats in the SP register
+                value = self.ram[self.reg[self.sp]]
+                # Put that value in current selected register
+                self.reg[operand_a] = value
+                # don't forget to increment register/sp
+                self.reg[self.sp] += 1
+                self.pc += 2
+            if IR == PUSH:
+                # FIRST DECREMENT stack pointer
+                self.reg[self.sp] -= 1
+                # look in and get the register op_a
+                value = self.reg[operand_a]
+                # add to ram at current spot of the stack
+                self.ram[self.reg[self.sp]] = value
+                self.pc += 2               
                 
             # else: 
             #     print("------------------")
