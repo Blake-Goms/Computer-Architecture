@@ -10,8 +10,8 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.reg = [0] * 8
-        self.fl = 0
-        self.sp = 3
+        self.fl = 6
+        self.sp = 7
 
     def load(self):
         """Load a program into memory."""
@@ -35,7 +35,7 @@ class CPU:
                 # print(int(bin(binary), 2))
                 value = int(l[0], 2)
                 self.ram[address] = value
-                print("In ram, printed:", bin(self.ram[address]))
+                # print("In ram, printed:", bin(self.ram[address]))
                 address += 1
 
     def ram_read(self, MAR):
@@ -50,10 +50,13 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        elif op == "SUB": 
-            self.reg[reg_a] -= self.reg[reg_b]
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "CMP":
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.reg[self.fl] = 1
+            else:
+                self.reg[self.fl] = 0
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -83,7 +86,7 @@ class CPU:
         # Set flag register
         self.reg[self.fl] = 0
         # Set Stack Pointer
-        self.reg[self.sp] = 244
+        self.reg[self.sp] = 10
         # Instructions Decoded from LS8-spec
         HLT = 0b00000001
         LDI = 0b10000010
@@ -91,6 +94,9 @@ class CPU:
         MUL = 0b10100010
         POP = 0b01000110
         PUSH = 0b01000101
+        RET = 0b00010001
+        CALL = 0b01010000
+        ADD = 0b10100000
         
         while running or self.pc < len(self.ram):
             # IR comes from readme. needs to read mem address stored in PC and store result in IR
@@ -149,7 +155,33 @@ class CPU:
                 # add to ram at current spot of the stack
                 self.ram[self.reg[self.sp]] = value
                 self.pc += 2               
-                
+            
+            elif IR == CALL:
+                print("CALL =>", bin(IR))
+                # push address of next instruction to stack
+                # Decrement Pointer
+                self.reg[self.sp] -= 1
+                # Get value of next address of instruction
+                value = self.pc + 2
+                # Add to ram at current spot of the stack
+                self.ram[self.reg[self.sp]] = value
+                # Set PC to address stored in register[operand_a]
+                self.pc = self.reg[operand_a]
+
+            elif IR == RET:
+                print("RET =>", bin(IR))
+                # Get value at top of stack (it's in the SP register)
+                value = self.ram[self.reg[self.sp]]
+                # Increment stack pointer
+                self.reg[self.sp] += 1
+                # Set PC to value that we popped from the stack
+                self.pc = value
+            
+            elif IR == ADD:
+                print("ADD =>", bin(IR))
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
+
             # else: 
             #     print("------------------")
             #     print("PC", self.pc)
