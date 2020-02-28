@@ -97,67 +97,83 @@ class CPU:
         RET = 0b00010001
         CALL = 0b01010000
         ADD = 0b10100000
+        CMP = 0b10100111
+        JMP = 0b01010100
+        JEQ = 0b01010101
+        JNE = 0b01010110
         
         while running or self.pc < len(self.ram):
-            # IR comes from readme. needs to read mem address stored in PC and store result in IR
             IR = self.ram_read(self.pc)
-            #  op_a needs to read next byte after PC
             operand_a = self.ram_read(self.pc + 1)
-            #  op_b needs to read next 2 bytes after PC
             operand_b = self.ram_read(self.pc + 2)
-            # print('Running ---', IR)                
-            if IR == HLT:
-                print("HALT")
-                running = False
-                sys.exit(0)
-
-            elif IR == LDI:
-                print("LDI =>", bin(IR))
-                # LDI: register immediate. Set the value of a register to an integer
+            # print('Running ---', IR)
+            # print("PC = ", self.pc)
+            if IR == JEQ:
+                # print("Should be equal if 1:", self.reg[self.fl])
+                if self.reg[self.fl] == 1:
+                    # print("Jumping to:", self.reg[operand_a])
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2
+            
+            if IR == JNE:
+                if self.reg[self.fl] == 0:
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2
+            
+            if IR == JMP:
+                self.pc = self.reg[operand_a]
+            
+            if IR == CMP:
+                self.alu("CMP", operand_a, operand_b)
+                self.pc += 3
+            
+            if IR == LDI:
                 # Now put value in correct register
                 self.reg[operand_a] = operand_b
-                # used both, so advance by 3 to start at next correct value
-                # op_a will be 1 ahead from current pos, op_b 2
                 self.pc += 3
 
-            elif IR == PRN:
-                print("PRN =>", bin(IR))
-                # PRN: register pseudo-instruction
-                # print numeric value stored in given register
+            if IR == PRN:
                 print(self.reg[operand_a])
-                # print("reg", self.reg)
-                # print("PC", self.pc)
                 self.pc += 2
 
-            elif IR == MUL:
-                print("MUL =>", bin(IR))
-                # instruction handled by the ALU.
-                # Multiply the values in two registers together and store the result in registerA.
+            if IR == MUL:
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
-                
-                
-            elif IR == POP:
-                print("POP =>", bin(IR))
-                # Get the value at top of the stack thats in the SP register
+
+            if IR == ADD:
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
+
+            if IR == HLT:
+
+                running = False
+                return exit()
+
+            if IR == POP:
+
+                # Get value at top of stack (it's in the SP register)
                 value = self.ram[self.reg[self.sp]]
-                # Put that value in current selected register
+                # Put that value in selected register
                 self.reg[operand_a] = value
-                # don't forget to increment register/sp
+                # Increment stack pointer
                 self.reg[self.sp] += 1
+
                 self.pc += 2
-            elif IR == PUSH:
-                print("PUSH =>", bin(IR))
-                # FIRST DECREMENT stack pointer
+
+            if IR == PUSH:
+                # Decrement Pointer
                 self.reg[self.sp] -= 1
-                # look in and get the register op_a
+                # The register to look in, is in operand_a
+                # Get value in register
                 value = self.reg[operand_a]
-                # add to ram at current spot of the stack
+                # Add to ram at current spot of the stack
                 self.ram[self.reg[self.sp]] = value
-                self.pc += 2               
-            
-            elif IR == CALL:
-                print("CALL =>", bin(IR))
+
+                self.pc += 2
+
+            if IR == CALL:
                 # push address of next instruction to stack
                 # Decrement Pointer
                 self.reg[self.sp] -= 1
@@ -168,19 +184,14 @@ class CPU:
                 # Set PC to address stored in register[operand_a]
                 self.pc = self.reg[operand_a]
 
-            elif IR == RET:
-                print("RET =>", bin(IR))
+            if IR == RET:
                 # Get value at top of stack (it's in the SP register)
                 value = self.ram[self.reg[self.sp]]
                 # Increment stack pointer
                 self.reg[self.sp] += 1
+
                 # Set PC to value that we popped from the stack
                 self.pc = value
-            
-            elif IR == ADD:
-                print("ADD =>", bin(IR))
-                self.alu("ADD", operand_a, operand_b)
-                self.pc += 3
 
             # else: 
             #     print("------------------")
